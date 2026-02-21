@@ -1,0 +1,32 @@
+data:
+  path: data/raw/stroke.csv
+  target: stroke
+  id_column: id
+  positive_label: 1
+
+split:
+  test_size: 0.20
+  val_size: 0.20
+  stratify: true
+  random_state: 42
+
+training:
+  n_jobs: -1
+
+model:
+  use_calibration: true
+  calibration_method: isotonic     # sigmoid or isotonic
+  stack:
+    passthrough: true              # meta-model gets original features too
+
+threshold:
+  strategy: "recall_at_least"      # "f1" or "recall_at_least"
+  min_recall: 0.75                 # only used if strategy = recall_at_least
+
+explain:
+  background_samples: 200
+  shap_samples: 400
+  lime_num_features: 12
+  surrogate:
+    enabled: true
+    type: "logistic"               # "logistic" (interpretable)
