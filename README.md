@@ -1,202 +1,158 @@
-🧠 The “Glass Box” Stroke Healthcare Classifier
+# 🧠 The “Glass Box” Stroke Healthcare Classifier
 
-Engineered a transparent diagnostic model using SHAP to provide feature-level clinical justifications, bridging the gap between black-box AI and medical trust.
+> **Engineered a transparent diagnostic model using SHAP to provide feature-level clinical justifications, bridging the gap between black-box AI and medical trust.**
 
-📌 Project Overview
+---
 
-This project develops a clinically calibrated stacked ensemble model for stroke risk prediction using the Stroke Prediction Dataset.
+## 📌 Project Overview
+
+This project develops a **clinically calibrated stacked ensemble model** for stroke risk prediction using the Stroke Prediction Dataset.
 
 Unlike traditional black-box systems, this model integrates:
 
-Strong predictive performance
+- ✅ Strong predictive performance  
+- ✅ Probability calibration  
+- ✅ Clinically tuned threshold selection  
+- ✅ SHAP-based global and local explanations  
+- ✅ LIME patient-level explanations  
 
-Probability calibration
+The goal is to combine **accuracy + transparency**, enabling trustworthy decision support in healthcare environments.
 
-Clinically tuned threshold selection
+---
 
-SHAP-based global and local explanations
+## 🗂 Dataset
 
-LIME patient-level explanations
+**Source:** Kaggle Stroke Prediction Dataset  
+**Target variable:** `stroke` (0 = No Stroke, 1 = Stroke)
 
-The goal is to combine accuracy + transparency, enabling trustworthy decision support in healthcare environments.
+### Key Features
 
-🗂 Dataset
+- Age
+- Hypertension
+- Heart disease
+- Average glucose level
+- BMI
+- Smoking status
+- Work type
+- Residence type
+- Gender
 
-Source: Kaggle Stroke Prediction Dataset
-Target variable: stroke (0 = No Stroke, 1 = Stroke)
+The dataset is **highly imbalanced (~5% stroke cases)**, reflecting real-world screening scenarios.
 
-Key Features
+---
 
-Age
+## 🏗 Model Architecture
 
-Hypertension
+### 🔹 Preprocessing
 
-Heart disease
+- Median imputation (numeric features)
+- Most frequent imputation (categorical features)
+- Standard scaling (numeric features)
+- One-hot encoding (categorical features)
 
-Average glucose level
+### 🔹 Stacked Ensemble
 
-BMI
+**Base learners:**
 
-Smoking status
+- Random Forest
+- Extra Trees
+- HistGradientBoosting
+- SVM (RBF kernel)
 
-Work type
+**Meta-learner:**
 
-Residence type
+- Logistic Regression
 
-Gender
-
-The dataset is highly imbalanced (~5% stroke cases), reflecting real-world screening scenarios.
-
-🏗 Model Architecture
-🔹 Preprocessing
-
-Median imputation (numeric features)
-
-Most frequent imputation (categorical features)
-
-Standard scaling (numeric features)
-
-One-hot encoding (categorical features)
-
-🔹 Stacked Ensemble
-
-Base learners:
-
-Random Forest
-
-Extra Trees
-
-HistGradientBoosting
-
-SVM (RBF kernel)
-
-Meta-learner:
-
-Logistic Regression
-
-🔹 Probability Calibration
+### 🔹 Probability Calibration
 
 Isotonic calibration applied for improved clinical probability reliability.
 
-🎯 Threshold Strategy
+---
 
-Instead of using the default 0.5 threshold, we applied a recall-constrained strategy:
+## 🎯 Threshold Strategy
 
+Instead of using the default 0.5 threshold, we applied:
+
+```yaml
 strategy: recall_at_least
 min_recall: 0.75
+```
 
 This prioritizes identifying stroke cases while improving precision.
 
 Final selected threshold: 0.07
 
-📊 Model Performance (Test Set)
-Metric	Value
-ROC-AUC	0.843
-PR-AUC	0.278
-Recall (Sensitivity)	0.80
-Precision	0.152
-F1 Score	0.255
-Brier Score	0.0406
-Interpretation
+## 📊 Model Performance (Test Set)
 
-The model correctly identifies 80% of stroke cases
+| Metric | Value |
+|--------|-------|
+| ROC-AUC | **0.843** |
+| PR-AUC | **0.278** |
+| Recall (Sensitivity) | **0.80** |
+| Precision | **0.152** |
+| F1 Score | **0.255** |
+| Brier Score | **0.0406** |
 
-PR-AUC is ~5× better than random baseline (~0.05)
+### Interpretation
 
-Probability calibration is strong (low Brier score)
+- The model correctly identifies **80% of stroke cases**.
+- PR-AUC (~0.278) is approximately **5× higher than the random baseline (~0.05)**.
+- ROC-AUC (~0.84) indicates strong class discrimination.
+- The Brier score (0.0406) suggests well-calibrated probability estimates.
+- Precision is modest due to severe class imbalance (~5% positives), which is expected in screening systems.
 
-Precision is modest due to severe class imbalance (expected in screening systems)
+Overall, the system functions as a **safety-oriented screening model**, prioritizing high recall to reduce missed stroke cases.
 
-This performance reflects a clinically reasonable screening model.
+---
 
-🔍 Explainability (Glass Box Layer)
+## 🔍 Explainability (Glass Box Layer)
 
-Because stacked ensembles are complex, we implemented a surrogate glass-box model trained to mimic ensemble predictions.
+Because stacked ensembles are complex, a **surrogate glass-box model** was trained to approximate ensemble predictions.
 
-We then applied:
+Explainability techniques applied:
 
-SHAP (global + local explanations)
+- **SHAP** for global and local feature attribution
+- **LIME** for patient-level explanations
 
-LIME (patient-level explanations)
+---
 
-🧠 SHAP Global Feature Importance
+## 🧠 SHAP Global Feature Importance
 
 Top contributing features:
 
-Age (Strongest predictor)
+1. **Age** (strongest predictor)
+2. **Average Glucose Level**
+3. Hypertension
+4. Heart Disease
+5. BMI
 
-Average Glucose Level
+### Clinical Alignment
 
-Hypertension
+- Stroke incidence increases significantly with age.
+- Hyperglycemia is a major vascular risk factor.
+- Hypertension strongly correlates with cerebrovascular events.
 
-Heart Disease
+The model’s reasoning aligns with established epidemiological evidence, reinforcing its interpretability and trustworthiness.
 
-BMI
+---
 
-Clinical Alignment
+## 🧾 Example Interpretation
 
-Stroke incidence increases significantly with age
+> Elevated age and high average glucose levels significantly increased predicted stroke probability, while absence of hypertension reduced risk. This behavior is consistent with known stroke pathophysiology.
 
-Hyperglycemia is a major vascular risk factor
+---
 
-Hypertension strongly correlates with cerebrovascular events
-
-The model’s reasoning aligns with established epidemiological evidence, increasing trustworthiness.
-
-🧾 Example Interpretation
-
-Elevated age and high average glucose levels significantly increased predicted stroke probability, while absence of hypertension reduced risk. This aligns with clinical understanding of stroke pathophysiology.
-
-🏥 Clinical Framing
+## 🏥 Clinical Framing
 
 This system is designed as:
 
-A decision-support tool
+- A decision-support tool  
+- Not a diagnostic replacement  
+- Optimized for safety (high recall)  
+- Transparent through feature-level attribution  
 
-Not a diagnostic replacement
+---
 
-Optimized for safety (high recall)
+## 📚 Key Takeaway
 
-Transparent through feature-level attribution
-
-📂 Project Structure
-glass-box-stroke/
-├─ configs/
-├─ data/raw/
-├─ models/
-├─ reports/
-└─ src/
-🚀 How to Run
-1️⃣ Install
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-2️⃣ Train
-python -m src.train --config configs/default.yaml
-3️⃣ Generate Explanations
-python -m src.explain --config configs/default.yaml
-📈 Why This Project Matters
-
-Most healthcare ML systems suffer from:
-
-Opaque predictions
-
-Poor calibration
-
-Arbitrary thresholds
-
-No interpretability layer
-
-This project addresses those gaps by combining:
-
-Stacked ensemble performance
-
-Calibration
-
-Clinically tuned thresholding
-
-SHAP glass-box explanations
-
-📚 Key Takeaway
-
-This project demonstrates that high-performing ensemble models can be transformed into transparent, clinically interpretable systems, preserving both predictive power and medical trust.
+This project demonstrates that high-performing ensemble models can be transformed into **transparent, clinically interpretable systems**, preserving both predictive power and medical trust.
